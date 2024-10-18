@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>File Upload</title>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen flex-col">
+    <div class="flex w-full h-40 bg-white shadow-md px-8 pt-6 pb-8 mb-4 flex-row justify-center">
+        <span class="font-serif text-7xl text-justify self-center">U</span>
+        <span class="font-serif text-center text-5xl self-end">p</span>
+        <span class="font-serif text-center text-6xl self-end">L</span>
+        <span class="font-serif text-center text-7xl self-end">O</span>
+        <span class="font-serif text-center text-8xl self-end">A</span>
+        <span class="font-serif text-center text-9xl self-end">D</span>
+        <!-- <p class="w-full font-serif text-center text-9xl">
+            UPLOAD
+        </p> -->
+    </div>
+    <div class="">
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="file">
+                    Choose file
+                </label>
+            </div>
+            <div class="flex items-center justify-between">
+                <input type="file" name="xml">
+                <input class="boarder border-2 border-slate-600 rounded-lg w-12 hover:bg-gray-200" type="submit" value="提交">
+            </div>
+        </form>
+    </div>
+    {% if file_name %}
+    <div class="mt-5">
+        <p>File: {{file_name}} upload succeed !!!</p>
+    </div>
+    {% endif %}
+    {% if fail %}
+    <div class="mt-5">
+        <p>This is not a xml flie !!! Please try again !!!</p>
+    </div>
+    {% endif %}
+    <div class="flex justify-center mt-10 h-fit">
+        <form method="POST" action="main">
+          {% csrf_token %}
+          <input type="hidden" name="key" value="{{key}}">
+          <button class="text-center h-10 w-24 rounded-lg bg-blue-100 hover:shadow-inner hover:bg-blue-300">Go back</button>
+        </form>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+</head>
+<body class="bg-gray-100 flex min-h-screen flex-col">
+<div id="data" data-value="{{ data }}"></div>
+<div id="label" data-value="{{ label }}"></div>
+{% load static %}
+
+<div class="flex relative mt-20 flex-row justify-center">
+	<form method="GET" action="main_statics" class="flex justify-center w-2/3">
+		{% csrf_token %}
+		<input type="text" id="search" name="key" placeholder=" " class="w-full justify-center px-4 py-2 border border-gray-300 rounded-lg focus:outline-none peer">
+	</form>
+</div>
+<div class="w-full h-fit mt-10 flex flex-row justify-center">
+	
+	<div class="mr-5">
+		<canvas id="original_chart" width="500" height="500"></canvas>
+	</div>
+	<div>
+		<canvas id="original_porter_chart" width="500" height="500"></canvas>
+	</div>
+	
+	
+</div>
+
+
+<script src="/static/js/chart.js?v=1"></script>
+</body>
+</html>

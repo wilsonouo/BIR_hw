@@ -1,0 +1,6 @@
+input:focus ~ label,
+input:not(:placeholder-shown) ~ label {
+  transform: translateY(-1.5rem);
+  font-size: 0.75rem;
+  color: #3b82f6; /* Tailwind 的 blue-500 */
+}

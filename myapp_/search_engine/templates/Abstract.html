@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body class="bg-gray-100 flex min-h-screen flex-col">
+
+	<div class="flex flex-col my-5 h-fit">
+		<h2 class="w-full mt-10 font-serif text-2xl text-center"> {{title}} </h2>
+		<p class="w-full mt-10 px-10"> {{Abstract}} </p>
+		<p class="w-full text-center mt-20"> num_sentences : {{num_sentences}} </p>
+		<p class="w-full text-center"> num_words : {{num_words}} </p>
+		<p class="w-full text-center"> num_characters : {{num_characters}} </p>
+		<p class="w-full text-center"> num_ascii : {{num_ascii}} </p>
+		<p class="w-full text-center"> num_nonascii : {{num_nonascii}} </p>
+	</div>
+	<div class="flex justify-center mt-10 h-fit">
+	<form method="GET" action="present_type">
+		{% csrf_token %}
+		<input type="hidden" name="key" value="{{key}}">
+		<input type="hidden" name="present" value="{{present}}">
+		<input type="hidden" name="mode" value="{{mode}}">
+		<button class="text-center h-10 w-24 rounded-lg bg-blue-100 hover:shadow-inner hover:bg-blue-300">Go back</button>
+	</form>
+	</div>
+	
+</body>
+</html>
