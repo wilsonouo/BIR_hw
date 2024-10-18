@@ -136,7 +136,7 @@ def ZipfDistribution():
         
         # find the article
         abstract = findAbstract(data_path)
-        words = re.findall('\S*\w+', abstract)
+        words = Token(abstract)
         for word in words:
             word = re.sub('[()]', '', word)
 
@@ -170,3 +170,12 @@ def porter(word):
     stemmed_words = porter.stem(word)
 
     return stemmed_words
+
+def Token(abstract):
+    words = re.findall('\S*\w+', abstract)
+    Tokens = []
+    for word in words:
+        word = re.sub('[()]', '', word)
+        Tokens.append(word)
+
+    return Tokens

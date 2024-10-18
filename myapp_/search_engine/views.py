@@ -50,7 +50,17 @@ def upload(request):
             return render(request, 'upload.html', {'key': key, 'fail': file_name})
         uploadxml = models.Uploadxml(file = xml)
         uploadxml.save()
+
+        # save word to db
+        abstract = modules.findAbstract(data_path)
+        words = modules.Token(abstract)
+        for word in words:
+            porter_term = modules.porter(word)
+            models.Words.objects.create(term = word, porter_term = porter_term)
+            models.article.objects.create(file = xml, word = term)
+    
         return render(request, 'upload.html', {'key': key, 'file_name': file_name})
+
     return render(request, 'upload.html', {'key': key})
 
 def main_two_xml(request):
