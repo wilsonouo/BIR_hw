@@ -26,18 +26,24 @@
 </div>
 
 <div class="flex relative mt-5 flex-row justify-center">
+
 	<form method="GET" class="mr-3" action="main_two_xml">
 		{% csrf_token %}
 		<input type="hidden" name="change" value="{{key}}">
 		<input type="hidden" name="mode" value="{{mode}}">
 		<button class="text-center h-10 w-20 rounded-lg bg-blue-100 hover:shadow-inner hover:bg-blue-300">{{mode}}</button>
 	</form>
-		<form method="POST" action="main_two_xml" class="flex justify-center w-2/3">
+	<form method="POST" action="main_two_xml" class="flex justify-center w-2/3">
 		{% csrf_token %}
 		<input type="hidden" name="mode" value="{{mode}}">
 		<input type="text" id="search" name="key" placeholder=" " class="w-full justify-center px-4 py-2 border border-gray-300 rounded-lg focus:outline-none peer">
 	</form>
 </div>
+{% if suggestword %}
+<div class="flex justify-center">
+	<p>Do you want to search for keyword '{{ suggestword }}' ?</p>
+</div>
+{% endif %}
 
 
 <div class="mt-5 flex flex-row h-fit">

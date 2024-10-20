@@ -5,8 +5,11 @@ from django.utils.safestring import mark_safe
 import re
 import json
 import nltk
+import difflib
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
+from .models import Words
+from .models import article
 
 
 def highlight_text(text, search_word, mode):
@@ -63,6 +66,14 @@ def findByKeyWord(key, mode):
     abstracts = []
     titles = []
     files = []
+    suggestword = ''
+    print(wordsuggest(key))
+    if key != wordsuggest(key):
+        key = wordsuggest(key)
+        suggestword = wordsuggest(key)
+        print('ji')
+    
+
     for file in XMLfile_list:
         data_path = os.path.join(data_dirPath, file)
         
@@ -80,7 +91,7 @@ def findByKeyWord(key, mode):
             files.append(file)
             
     
-    return titles, abstracts, files
+    return titles, abstracts, files, suggestword
 
 def asciiCount(text):
     
@@ -120,14 +131,29 @@ def staticsINFO(xml_file):
     num_ascii, num_nonascii = asciiCount(Abstract)
     
     return num_sentences, num_words, num_characters, num_ascii, num_nonascii
-    
-    
-def ZipfDistribution():
 
-    nltk.download('punkt_tab')
-    
+def Distributionbyterm(term = ''):
     data_dirPath = os.path.join(os.getcwd(), 'search_engine/data')
-    XMLfile_list = os.listdir(data_dirPath)
+
+    if term == '':
+        XMLfile_list = os.listdir(data_dirPath)
+
+    else:
+        if Words.objects.filter(term = term):
+            key = Words.objects.filter(term = term)[0]
+            articles = key.terms.all()
+            XMLfile_list = []
+            for article in articles:
+                XMLfile_list.append(article.file)
+            XMLfile_list = list(set(XMLfile_list))
+
+    label, data, label_porter, data_porter = ZipfDistribution(XMLfile_list)
+
+    return label, data, label_porter, data_porter
+    
+    
+def ZipfDistribution(XMLfile_list):
+    data_dirPath = os.path.join(os.getcwd(), 'search_engine/data')
 
     frequency = {}
     frequency_porter = {}
@@ -138,14 +164,13 @@ def ZipfDistribution():
         abstract = findAbstract(data_path)
         words = Token(abstract)
         for word in words:
-            word = re.sub('[()]', '', word)
 
             # original chart
             count = frequency.get(word,0)
             frequency[word] = count + 1
 
             # porter chart
-            porter_word = porter(word)
+            porter_word = Words.objects.filter(term = word)[0].porter_term
             count_porter = frequency_porter.get(porter_word,0)
             frequency_porter[porter_word] = count_porter + 1
         
@@ -160,8 +185,8 @@ def ZipfDistribution():
     return label, data, label_porter, data_porter
 
 def porter(word):
-    # Download required NLTK data
-    nltk.download('punkt')
+    # # Download required NLTK data
+    # nltk.download('punkt')
 
     # Create a PorterStemmer object
     porter = PorterStemmer()
@@ -179,3 +204,12 @@ def Token(abstract):
         Tokens.append(word)
 
     return Tokens
+
+def wordsuggest(term):
+    words = Words.objects.values_list('term', flat=True)
+
+    # 使用 get_close_matches 查找相似的单词
+    suggestions = difflib.get_close_matches(term, words, n=1, cutoff=0.6)[0]
+
+    return suggestions
+    

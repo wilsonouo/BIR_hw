@@ -9,5 +9,6 @@ urlpatterns = [
     path('present_type', views.present_type),
     path('main_statics', views.main_statics),
     path('ajax/initial_chart/', views.initial_chart, name='initial_chart'),
+    path('ajax/add_chart/', views.add_chart, name='add_chart'),
 ]
 

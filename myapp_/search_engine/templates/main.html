@@ -38,6 +38,11 @@
 			<input type="text" id="search" name="key" placeholder=" " class="w-full justify-center px-4 py-2 border border-gray-300 rounded-lg focus:outline-none peer">
 		</form>
 	</div>
+	{% if suggestword %}
+	<div class="flex justify-center">
+		<p>Do you want to search for keyword '{{ suggestword }}' ?</p>
+	</div>
+	{% endif %}
 
 	<div class="flex justify-center">
 		<p> Number of result: {{num_result}} </p>

@@ -11,10 +11,10 @@ def main(request):
     if request.method == 'POST':
         key_word = request.POST.get('key')
         mode = request.POST.get('mode')
-        titles, abstracts, files = modules.findByKeyWord(key_word, mode)
+        titles, abstracts, files, suggestword = modules.findByKeyWord(key_word, mode)
         num_result = len(files)
         articles = zip(titles, abstracts, files)
-        return render(request, 'main.html', {'articles': articles, 'num_result': num_result, 'key': key_word, 'mode': mode})
+        return render(request, 'main.html', {'articles': articles, 'num_result': num_result, 'key': key_word, 'mode': mode, 'suggestword': suggestword})
     
     if 'change' in request.GET:
         mode = request.GET.get('mode')
@@ -41,23 +41,35 @@ def Abstract(request):
     num_sentences, num_words, num_characters, num_ascii, num_nonascii = modules.staticsINFO(xml_file)
     return render(request, 'Abstract.html', {'title': title, 'Abstract': Abstract, 'num_sentences': num_sentences, 'num_words': num_words, 'num_characters': num_characters, 'num_ascii': num_ascii, 'num_nonascii': num_nonascii, 'key': key, 'present': present, 'mode': mode})
 
+
 def upload(request):
     key = request.GET.get('key')
     if request.method == 'POST':
-        xml = request.FILES.get('xml')
-        file_name = xml.name
-        if file_name.split('.')[1] != 'xml':
-            return render(request, 'upload.html', {'key': key, 'fail': file_name})
-        uploadxml = models.Uploadxml(file = xml)
-        uploadxml.save()
+        xmlist = request.FILES.getlist('xml')
+        key_error = []
+        fail = []
+        for xml in xmlist:
+            file_name = xml.name
+            if file_name.split('.')[1] != 'xml':
+                key_error.append(key)
+                fail.append(file_name)
+            uploadxml = models.Uploadxml(file = xml)
+            uploadxml.save()
+            abstract = modules.findAbstract(file_name)
+            words = modules.Token(abstract)
+            for word in words:
+                if models.Words.objects.filter(term = word).exists():
+                    term = models.Words.objects.filter(term = word)[0]
+                else:
+                    porter_term = modules.porter(word)
+                    term = models.Words.objects.create(term = word, porter_term = porter_term)
+                article = models.article.objects.create(file = xml, word = term)
+        
+        if len(fail) > 0:
+            return render(request, 'upload.html', {'key': key_error, 'fail': fail})
 
         # save word to db
-        abstract = modules.findAbstract(data_path)
-        words = modules.Token(abstract)
-        for word in words:
-            porter_term = modules.porter(word)
-            models.Words.objects.create(term = word, porter_term = porter_term)
-            models.article.objects.create(file = xml, word = term)
+        
     
         return render(request, 'upload.html', {'key': key, 'file_name': file_name})
 
@@ -73,11 +85,11 @@ def main_two_xml(request):
            page = int(request.POST.get('page')) + 1 
         else:
             page = 1
-        titles, abstracts, files = modules.findByKeyWord(key_word, mode)
+        titles, abstracts, files, suggestword = modules.findByKeyWord(key_word, mode)
         print(page)
         num_result = len(files[2*page-2: 2*page])
         articles = zip(titles[2*page-2: 2*page], abstracts[2*page-2: 2*page], files[2*page-2: 2*page])
-        return render(request, 'main_two_xml.html', {'articles': articles, 'key': key_word, 'mode': mode, 'page': page, 'num': num_result})
+        return render(request, 'main_two_xml.html', {'articles': articles, 'key': key_word, 'mode': mode, 'page': page, 'num': num_result, 'suggestword': suggestword})
     
     if 'change' in request.GET:
         mode = request.GET.get('mode')
@@ -113,12 +125,16 @@ def present_type(request):
     return redirect(f'/search_engine/main?{query_string}')
 
 def main_statics(request):
-    labels, data, labels_porter, data_porter = modules.ZipfDistribution()
     
-    return render(request, 'main_statics.html', {'label': labels, 'data': data, 'labels': labels})
+    return render(request, 'main_statics.html')
 
 def initial_chart(request):
-    labels, data, labels_porter, data_porter = modules.ZipfDistribution()
+    labels, data, labels_porter, data_porter = modules.Distributionbyterm()
+
+    return JsonResponse([{'data': data, 'labels': labels, 'data_porter': data_porter, 'labels_porter': labels_porter}], safe=False)
+
+def add_chart(request):
+    labels, data, labels_porter, data_porter = modules.Distributionbyterm(modules.wordsuggest(request.POST.get('term')))
 
     return JsonResponse([{'data': data, 'labels': labels, 'data_porter': data_porter, 'labels_porter': labels_porter}], safe=False)
     
