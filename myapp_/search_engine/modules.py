@@ -10,6 +10,7 @@ from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 from .models import Words
 from .models import article
+from tqdm import tqdm
 
 
 def highlight_text(text, search_word, mode):
@@ -157,22 +158,25 @@ def ZipfDistribution(XMLfile_list):
 
     frequency = {}
     frequency_porter = {}
-    for file in XMLfile_list:
-        data_path = os.path.join(data_dirPath, file)
-        
-        # find the article
-        abstract = findAbstract(data_path)
-        words = Token(abstract)
-        for word in words:
+    for file in tqdm(XMLfile_list):
+        try:
+            data_path = os.path.join(data_dirPath, file)
+            
+            # find the article
+            abstract = findAbstract(data_path)
+            words = Token(abstract)
+            for word in words:
 
-            # original chart
-            count = frequency.get(word,0)
-            frequency[word] = count + 1
+                # original chart
+                count = frequency.get(word,0)
+                frequency[word] = count + 1
 
-            # porter chart
-            porter_word = Words.objects.filter(term = word)[0].porter_term
-            count_porter = frequency_porter.get(porter_word,0)
-            frequency_porter[porter_word] = count_porter + 1
+                # porter chart
+                porter_word = Words.objects.filter(term = word)[0].porter_term
+                count_porter = frequency_porter.get(porter_word,0)
+                frequency_porter[porter_word] = count_porter + 1
+        except:
+            continue
         
     frequency = {k: v for k, v in sorted(frequency.items(), key=lambda item: item[1], reverse=True)}
     data = list(frequency.values())

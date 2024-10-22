@@ -43,28 +43,32 @@ def Abstract(request):
 
 
 def upload(request):
+
     key = request.GET.get('key')
     if request.method == 'POST':
         xmlist = request.FILES.getlist('xml')
         key_error = []
         fail = []
         for xml in xmlist:
-            file_name = xml.name
-            if file_name.split('.')[1] != 'xml':
-                key_error.append(key)
-                fail.append(file_name)
-            uploadxml = models.Uploadxml(file = xml)
-            uploadxml.save()
-            abstract = modules.findAbstract(file_name)
-            words = modules.Token(abstract)
-            for word in words:
-                if models.Words.objects.filter(term = word).exists():
-                    term = models.Words.objects.filter(term = word)[0]
-                else:
-                    porter_term = modules.porter(word)
-                    term = models.Words.objects.create(term = word, porter_term = porter_term)
-                article = models.article.objects.create(file = xml, word = term)
-        
+            try:
+                file_name = xml.name
+                if file_name.split('.')[1] != 'xml':
+                    key_error.append(key)
+                    fail.append(file_name)
+                uploadxml = models.Uploadxml(file = xml)
+                uploadxml.save()
+                abstract = modules.findAbstract(file_name)
+                words = modules.Token(abstract)
+                for word in words:
+                    if models.Words.objects.filter(term = word).exists():
+                        term = models.Words.objects.filter(term = word)[0]
+                    else:
+                        porter_term = modules.porter(word)
+                        term = models.Words.objects.create(term = word, porter_term = porter_term)
+                    article = models.article.objects.create(file = xml, word = term)
+            except:
+                continue
+            
         if len(fail) > 0:
             return render(request, 'upload.html', {'key': key_error, 'fail': fail})
 
